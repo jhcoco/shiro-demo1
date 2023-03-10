@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiit.dao.UserDao">
+    <insert id="insertUser">
+        insert into t_user (login_name, password, salt, username)
+        values (#{loginName}, #{password}, #{salt}, #{username})
+    </insert>
+    <select id="queryUserByLoginName" parameterType="string" resultType="User">
+        select *
+        from t_user
+        where login_name = #{principal}
+    </select>
+    <select id="queryRolesByLoginName" resultType="java.lang.String">
+        select tr.role_name
+        from t_user
+                 join t_user_role tur on t_user.id = tur.user_id
+                 join t_role tr on tur.role_id = tr.id
+        where t_user.login_name = #{principal};
+    </select>
+    <select id="queryPermissionByLoginName" resultType="java.lang.String">
+        select tp.permission_name
+        from t_user tu
+                 join t_user_role tur on tu.id = tur.user_id
+                 join t_role_permission trp on tur.role_id = trp.role_id
+                 join t_permission tp on trp.permission_id = tp.id
+        where tu.login_name = #{principal}
+    </select>
+</mapper>

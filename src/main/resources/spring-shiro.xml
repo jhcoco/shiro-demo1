@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 注入自定义 realm-->
+    <bean id="myRealm" class="com.aiit.realm.MyRealm">
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="SHA-256"/>
+                <property name="storedCredentialsHexEncoded" value="false"/>
+                <property name="hashIterations" value="1024"/>
+            </bean>
+        </property>
+
+    </bean>
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"/>
+        <!--        <property name="rememberMeManager" ref="rememberMeManager"/>-->
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+
+    <!-- 配置 shiro 过滤器与过滤器链-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/toLogin"/>
+        <property name="unauthorizedUrl" value="/permission"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /getUsers = authc
+                /user/logout = logout
+            </value>
+        </property>
+    </bean>
+
+    <bean id="simpleCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <property name="name" value="JSESSIONID"/>
+        <property name="httpOnly" value="true"/>
+        <property name="maxAge" value="604800"/>
+    </bean>
+    <!--    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">-->
+    <!--        <property name="cookie" ref="simpleCookie"/>-->
+    <!--    </bean>-->
+
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="sessionIdCookie" ref="simpleCookie"/>
+        <property name="globalSessionTimeout" value="1800000"/>
+    </bean>
+</beans>
